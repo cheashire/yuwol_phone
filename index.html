@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>들키면 죽음</title>
+  <style>
+    :root {
+      --text-light: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.7);
+      --app-bg: #f5f6f8;
+      --app-card: #ffffff;
+      --app-text: #191f28;
+      --app-sub: #8b95a1;
+      --kakao-yellow: #fee500;
+      --kakao-bg: #abc1d1;
+      --polaris-navy: #0f172a;
+      --accent-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif;
+    }
+
+    body {
+      background-color: #121417;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* 스마트폰 외곽 프레임 (갤럭시 울트라/플랫 느낌의 모던 프레임) */
+    .phone-frame {
+      width: 365px;
+      height: 760px;
+      border-radius: 42px;
+      border: 6px solid #2b303a;
+      box-shadow: 0 0 0 2px #111317, 0 25px 60px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      /* 갤럭시 기본 푸른 계열 추상 그래픽 배경화면 */
+      background: 
+        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.75) 0%, transparent 45%),
+        radial-gradient(circle at 20% 55%, rgba(37, 99, 235, 0.85) 0%, transparent 55%),
+        radial-gradient(circle at 75% 85%, rgba(99, 102, 241, 0.65) 0%, transparent 50%),
+        linear-gradient(145deg, #061126 0%, #0d2759 45%, #07193a 100%);
+    }
+
+    /* 배경 그래픽 디테일 도형 (기본 배경화면 느낌 강조) */
+    .wallpaper-deco {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .wallpaper-deco::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      top: 18%;
+      left: -60px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.45), rgba(59, 130, 246, 0.05));
+      border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+      filter: blur(8px);
+      transform: rotate(-15deg);
+    }
+
+    .wallpaper-deco::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      bottom: 15%;
+      right: -50px;
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.35), rgba(30, 58, 138, 0.1));
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      filter: blur(6px);
+    }
+
+    /* 전면 카메라 펀치홀 */
+    .punch-hole {
+      width: 12px;
+      height: 12px;
+      background: #08090a;
+      border-radius: 50%;
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      box-shadow: inset 0 0 3px rgba(255,255,255,0.2);
+    }
+
+    /* 상단 상태 표시줄 */
+    .status-bar {
+      height: 40px;
+      padding: 8px 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      z-index: 90;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .status-bar.dark-text {
+      color: #191f28;
+    }
+
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    /* 화면 컨테이너 공통 */
+    .screen {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      position: relative;
+      z-index: 10;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .screen::-webkit-scrollbar {
+      width: 0px;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: screenFade 0.22s ease-out;
+    }
+
+    @keyframes screenFade {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ==================== 1. 잠금 화면 ==================== */
+    #lock-screen {
+      justify-content: space-between;
+      padding: 36px 20px 30px;
+      color: var(--text-light);
+    }
+
+    .lock-top {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .lock-clock {
+      font-size: 64px;
+      font-weight: 300;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .lock-date {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.9);
+      margin-top: 8px;
+    }
+
+    /* 잠금화면 알림 배너 */
+    .lock-notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 20px 0 auto;
+    }
+
+    .lock-notif {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 18px;
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    }
+
+    .notif-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .notif-content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .notif-title {
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .notif-time {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+
+    .notif-desc {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.92);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 지문 인식 영역 */
+    .fingerprint-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .fp-hint {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: -0.2px;
+    }
+
+    .fp-sensor {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease, background 0.2s;
+      animation: fpPulse 2.2s infinite ease-in-out;
+    }
+
+    .fp-sensor:active {
+      transform: scale(0.92);
+      background: rgba(56, 189, 248, 0.35);
+      border-color: #7dd3fc;
+    }
+
+    .fp-sensor svg {
+      width: 34px;
+      height: 34px;
+      stroke: #ffffff;
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+    }
+
+    @keyframes fpPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
+    }
+
+    /* ==================== 2. 홈 화면 ==================== */
+    #home-screen {
+      justify-content: space-between;
+      padding: 24px 20px 14px;
+      color: var(--text-light);
+    }
+
+    /* 홈 화면 상단 기본 날씨/시계 위젯 */
+    .home-widget {
+      margin-top: 12px;
+      padding: 16px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .hw-left .hw-time {
+      font-size: 44px;
+      font-weight: 300;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+
+    .hw-left .hw-date {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 6px;
+    }
+
+    .hw-right {
+      text-align: right;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .hw-temp {
+      font-size: 24px;
+      font-weight: 500;
+    }
+
+    /* 미니 디데이/메모 위젯 */
+    .mini-widget {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 22px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: auto;
+      margin-top: 14px;
+    }
+
+    .mw-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .mw-dday {
+      font-size: 15px;
+      font-weight: 700;
+      color: #bae6fd;
+    }
+
+    /* 홈 화면 앱 아이콘 그리드 (7개 앱) */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px 12px;
+      margin-bottom: 26px;
+    }
+
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+    }
+
+    .app-squircle {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      position: relative;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+      transition: transform 0.15s ease;
+    }
+
+    .app-item:hover .app-squircle {
+      transform: translateY(-3px);
+    }
+
+    .app-item:active .app-squircle {
+      transform: scale(0.93);
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid rgba(15, 23, 42, 0.5);
+    }
+
+    .app-name {
+      font-size: 11.5px;
+      color: #ffffff;
+      font-weight: 400;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* 각 앱 아이콘 컬러 (갤럭시 One UI 감성) */
+    .ico-kakao { background: #fee500; color: #3c1e1e; }
+    .ico-msg { background: linear-gradient(145deg, #38bdf8, #2563eb); color: #fff; }
+    .ico-contact { background: linear-gradient(145deg, #fb923c, #ea580c); color: #fff; }
+    .ico-gallery { background: linear-gradient(145deg, #f43f5e, #db2777); color: #fff; }
+    .ico-memo { background: linear-gradient(145deg, #fbbf24, #d97706); color: #fff; }
+    .ico-ebook { background: linear-gradient(145deg, #34d399, #059669); color: #fff; }
+    .ico-polaris { background: linear-gradient(145deg, #1e293b, #0f172a); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .ico-lock { background: rgba(255, 255, 255, 0.18); color: #fff; backdrop-filter: blur(10px); }
+
+    /* ==================== 3. 서브 앱 화면 공통 ==================== */
+    .sub-app {
+      background: var(--app-bg);
+      color: var(--app-text);
+    }
+
+    .app-topbar {
+      padding: 14px 18px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eef0f3;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .app-topbar-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .back-link {
+      background: none;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--app-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .section-body {
+      padding: 14px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .white-card {
+      background: var(--app-card);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .white-card:hover {
+      background: #fafbfc;
+    }
+
+    /* ==================== 3-1. 카카오톡 ==================== */
+    .kakao-room-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid #f2f3f5;
+      cursor: pointer;
+    }
+
+    .kakao-room-item:hover {
+      background: #f9fafb;
+    }
+
+    .kakao-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 17px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .kakao-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .kakao-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #191f28;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 3px;
+    }
+
+    .kakao-preview {
+      font-size: 12.5px;
+      color: #6b7684;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .kakao-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .kakao-time {
+      font-size: 11px;
+      color: #8b95a1;
+    }
+
+    .kakao-unread {
+      background: #f04452;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+
+    /* 카카오톡 대화창 내부 */
+    #kakao-chat-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      background: var(--kakao-bg);
+    }
+
+    .kakao-chat-header {
+      background: rgba(171, 193, 209, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      position: sticky;
+      top: 0;
+    }
+
+    .kakao-bubbles {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .k-date-pill {
+      align-self: center;
+      background: rgba(0, 0, 0, 0.15);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin: 4px 0;
+    }
+
+    .k-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 78%;
+    }
+
+    .k-row.them {
+      align-self: flex-start;
+    }
+
+    .k-row.me {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .k-sender {
+      font-size: 11px;
+      color: #333d4b;
+      margin-bottom: 3px;
+      margin-left: 2px;
+    }
+
+    .k-bubble-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .k-bubble {
+      padding: 9px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: keep-all;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+    }
+
+    .k-row.them .k-bubble {
+      background: #ffffff;
+      color: #191f28;
+      border-top-left-radius: 3px;
+    }
+
+    .k-row.me .k-bubble {
+      background: var(--kakao-yellow);
+      color: #191f28;
+      border-top-right-radius: 3px;
+    }
+
+    .k-time {
+      font-size: 10px;
+      color: #4e5968;
+      flex-shrink: 0;
+    }
+
+    /* ==================== 3-2. 갤러리 ==================== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .photo-card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      cursor: pointer;
+    }
+
+    .photo-thumb {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      position: relative;
+    }
+
+    .photo-caption {
+      padding: 10px;
+      font-size: 12px;
+      color: #333d4b;
+      font-weight: 600;
+    }
+
+    .photo-date {
+      font-size: 10.5px;
+      color: #8b95a1;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    /* ==================== 3-3. 북극성 인트라넷 ==================== */
+    .polaris-app {
+      background: #0b1120;
+      color: #f8fafc;
+    }
+
+    .polaris-app .app-topbar {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      color: #f8fafc;
+    }
+
+    .polaris-app .back-link {
+      color: #38bdf8;
+    }
+
+    .polaris-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 15px;
+    }
+
+    .p-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    /* ==================== 하단 갤럭시 내비게이션 바 ==================== */
+    .nav-bar {
+      height: 42px;
+      background: rgba(10, 15, 28, 0.75);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 95;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+      width: 60px;
+      height: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .nav-btn:hover {
+      color: #ffffff;
+    }
+        /* 모바일 기기(화면 폭 480px 이하)에서 접속 시 전체 화면으로 전환 */
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+      }
+      .phone-frame {
+        width: 100vw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .punch-hole {
+        display: none; /* 실제 폰 상단바와 겹치지 않게 가림 */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-frame">
+    <div class="wallpaper-deco"></div>
+    <div class="punch-hole"></div>
+
+    <!-- 상단 상태 표시줄 -->
+    <div class="status-bar" id="status-bar">
+      <span>SKT 5G</span>
+      <div class="status-right">
+        <span>🔇</span>
+        <span>LTE/5G</span>
+        <span>91% 🔋</span>
+      </div>
+    </div>
+
+    <!-- ==================== 1. 잠금 화면 ==================== -->
+    <div class="screen active" id="lock-screen">
+      <div class="lock-top">
+        <div class="lock-clock">18:42</div>
+        <div class="lock-date">10월 19일 월요일</div>
+      </div>
+
+      <div class="lock-notif-list">
+        <div class="lock-notif" onclick="unlockPhone()">
+          <div class="notif-icon ico-kakao">💬</div>
+          <div class="notif-content">
+            <div class="notif-title">
+              <span>머저리</span>
+              <span class="notif-time">방금</span>
+            </div>
+            <div class="notif-desc">1층 로비 내려가는 중이에요!</div>
+          </div>
+        </div>
+
+        <div class="lock-notif" onclick="unlockPhone()">
+          <div class="notif-icon ico-kakao">💬</div>
+          <div class="notif-content">
+            <div class="notif-title">
+              <span>카카오톡</span>
+              <span class="notif-time">14분 전</span>
+            </div>
+            <div class="notif-desc">읽지 않은 메시지가 9개 있습니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 지문 터치 잠금 해제 -->
+      <div class="fingerprint-area">
+        <span class="fp-hint">지문 센서 영역을 터치하여 잠금 해제</span>
+        <div class="fp-sensor" onclick="unlockPhone()" title="터치하여 잠금 해제">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" />
+            <path d="M14 13.12c0 2.38 0 6.38-1 8.88" />
+            <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02" />
+            <path d="M2 12a10 10 0 0 1 18-6" />
+            <path d="M2 16h.01" />
+            <path d="M21.8 16c.2-2 .131-5.354 0-6" />
+            <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2" />
+            <path d="M8.65 22c.21-.66.45-1.32.57-2" />
+            <path d="M9 6.8a6 6 0 0 1 9 5.2v2" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 2. 홈 화면 ==================== -->
+    <div class="screen" id="home-screen">
+      <!-- 상단 기본 시계/날씨 위젯 -->
+      <div class="home-widget">
+        <div class="hw-left">
+          <div class="hw-time">18:42</div>
+          <div class="hw-date">10월 19일 (월) · 강남구 역삼동</div>
+        </div>
+        <div class="hw-right">
+          <div class="hw-temp">☀️ 17°</div>
+          <div>맑음 · 미세먼지 좋음</div>
+        </div>
+      </div>
+
+      <!-- 7개 구성 어플 + 화면 잠금 버튼 (4x2 배열) -->
+      <div class="app-grid">
+        <div class="app-item" onclick="openApp('kakao-screen')">
+          <div class="app-squircle ico-kakao">
+            💬
+            <span class="badge">10</span>
+          </div>
+          <span class="app-name">카카오톡</span>
+        </div>
+
+        <div class="app-item" onclick="openApp('polaris-screen')">
+          <div class="app-squircle ico-polaris">✦</div>
+          <span class="app-name">북극성</span>
+        </div>
+
+        <div class="app-item" onclick="openApp('ebook-screen')">
+          <div class="app-squircle ico-ebook">📚</div>
+          <span class="app-name">전자책</span>
+        </div>
+
+        <div class="app-item" onclick="openApp('contact-screen')">
+          <div class="app-squircle ico-contact">👤</div>
+          <span class="app-name">연락처</span>
+        </div>
+
+        <div class="app-item" onclick="openApp('msg-screen')">
+          <div class="app-squircle ico-msg">
+            ✉️
+            <span class="badge">2</span>
+          </div>
+          <span class="app-name">메시지</span>
+        </div>
+
+        <div class="app-item" onclick="openApp('gallery-screen')">
+          <div class="app-squircle ico-gallery">🌺</div>
+          <span class="app-name">갤러리</span>
+        </div>
+
+        <div class="app-item" onclick="lockPhone()">
+          <div class="app-squircle ico-lock">🔒</div>
+          <span class="app-name">화면 잠금</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-1. 카카오톡 ==================== -->
+    <div class="screen sub-app" id="kakao-screen">
+      <div class="app-topbar" id="kakao-list-topbar">
+        <span class="app-topbar-title">채팅</span>
+        <span style="font-size:12px; color:#8b95a1;">안 읽은 채팅 4</span>
+      </div>
+
+      <!-- 채팅방 목록 -->
+      <div id="kakao-room-list">
+        <!-- 1. 윤이솔 (상단 고정) -->
+        <div class="kakao-room-item" onclick="openKakaoChat('isol')">
+          <div class="kakao-avatar" style="background:#ffe4e6;">🍑</div>
+          <div class="kakao-info">
+            <div class="kakao-name">머저리</div>
+            <div class="kakao-preview">1층 로비 내려가는 중이에요!</div>
+          </div>
+          <div class="kakao-meta">
+            <span class="kakao-time">오후 6:42</span>
+            <span class="kakao-unread">1</span>
+          </div>
+        </div>
+
+        <!-- 2. 플러팅/안읽씹 1 -->
+        <div class="kakao-room-item" onclick="openKakaoChat('flirt1')">
+          <div class="kakao-avatar" style="background:#e0f2fe;">✨</div>
+          <div class="kakao-info">
+            <div class="kakao-name">강하진 (A급/공격1팀)</div>
+            <div class="kakao-preview">바쁘신가 보네ㅠ 다음에 시간 나실 때 꼭 같이 마셔요!</div>
+          </div>
+          <div class="kakao-meta">
+            <span class="kakao-time">오후 5:10</span>
+            <span class="kakao-unread">4</span>
+          </div>
+        </div>
+
+        <!-- 3. 플러팅/안읽씹 2 -->
+        <div class="kakao-room-item" onclick="openKakaoChat('flirt2')">
+          <div class="kakao-avatar" style="background:#f3e8ff;">🦋</div>
+          <div class="kakao-info">
+            <div class="kakao-name">김서연 (백호길드)</div>
+            <div class="kakao-preview">혹시 이번 주말에 시간 괜찮으세요? 밥 한번 사고 싶어서요ㅎㅎ</div>
+          </div>
+          <div class="kakao-meta">
+            <span class="kakao-time">어제</span>
+            <span class="kakao-unread">3</span>
+          </div>
+        </div>
+
+        <!-- 4. 길드원 안읽씹 -->
+        <div class="kakao-room-item" onclick="openKakaoChat('guildmate')">
+          <div class="kakao-avatar">🍺</div>
+          <div class="kakao-info">
+            <div class="kakao-name">최태성 (북극성 B급)</div>
+            <div class="kakao-preview">다들 부길드장님 실물 한번 뵙고 싶어합니다ㅋㅋ</div>
+          </div>
+          <div class="kakao-meta">
+            <span class="kakao-time">어제</span>
+            <span class="kakao-unread">2</span>
+          </div>
+        </div>
+
+        <!-- 5. 어머니 -->
+        <div class="kakao-room-item" onclick="openKakaoChat('mom')">
+          <div class="kakao-avatar">🌿</div>
+          <div class="kakao-info">
+            <div class="kakao-name">어머니</div>
+            <div class="kakao-preview">그래 밥은 잘 챙겨 먹고 다니니</div>
+          </div>
+          <div class="kakao-meta">
+            <span class="kakao-time">10월 16일</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 카카오톡 대화방 상세 뷰 -->
+      <div id="kakao-chat-view">
+        <div class="kakao-chat-header">
+          <button class="back-link" onclick="closeKakaoChat()">← 뒤로</button>
+          <span class="app-topbar-title" id="kakao-chat-title" style="font-size:15px;">머저리</span>
+          <span style="width:40px;"></span>
+        </div>
+        <div class="kakao-bubbles" id="kakao-chat-bubbles"></div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-2. 북극성 (인트라넷) ==================== -->
+    <div class="screen polaris-app" id="polaris-screen">
+      <div class="app-topbar">
+        <span class="app-topbar-title">✦ POLARIS INTRANET</span>
+        <span style="font-size:11px; color:#38bdf8;">S급 임원 권한</span>
+      </div>
+      <div class="section-body">
+        <div class="polaris-card">
+          <span class="p-badge">부길드장 프로필</span>
+          <div style="font-size:16px; font-weight:700; margin-bottom:6px;">이유월 (S급 · 에너지/공격)</div>
+          <div style="font-size:12.5px; color:#94a3b8; line-height:1.6;">
+            • 고유 이능: 중력장<br/>
+            • 현재 상태: 본부 대기 중<br/>
+            • 미결재 서류: 7건 (열람 안 함)
+          </div>
+        </div>
+
+        <div class="polaris-card">
+          <span class="p-badge" style="background:rgba(244,63,94,0.15); color:#fb7185;">사내 익명 라운지 인기글</span>
+          <div style="font-size:13px; font-weight:600; margin-bottom:4px;">방금 지하 주차장에서 부길드장님 본 썰</div>
+          <div style="font-size:12px; color:#94a3b8;">
+            인상은 여전히 무서운데 손에 복숭아 맛 디저트 봉투 달랑달랑 들고 있어서 눈 의심함ㅋㅋㅋ
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-4. 전자책 ==================== -->
+    <div class="screen sub-app" id="ebook-screen">
+      <div class="app-topbar">
+        <span class="app-topbar-title">전자책 서재</span>
+        <span style="font-size:12px; color:#059669; font-weight:600;">읽고 있는 책 3</span>
+      </div>
+      <div class="section-body">
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:14px; font-weight:700;">《차원 너머의 대마도사》</span>
+            <span style="font-size:11px; color:#059669; font-weight:700;">88%</span>
+          </div>
+          <div style="font-size:12px; color:#6b7684;">정통 판타지 · 18권 읽는 중</div>
+          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "세계관은 큰데 마법 영창이 너무 김."</div>
+        </div>
+
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:14px; font-weight:700;">《드래곤 로드의 귀환》</span>
+            <span style="font-size:11px; color:#059669; font-weight:700;">완독</span>
+          </div>
+          <div style="font-size:12px; color:#6b7684;">대서사 판타지 · 전 24권</div>
+          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "주먹으로 다 부수는 전개라 마음에 듦."</div>
+        </div>
+
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:14px; font-weight:700;">《성검의 주인을 찾습니다》</span>
+            <span style="font-size:11px; color:#f59e0b; font-weight:700;">하차</span>
+          </div>
+          <div style="font-size:12px; color:#6b7684;">판타지 · 3권에서 멈춤</div>
+          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "주인공이 답답하게 말만 많음."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-5. 연락처 ==================== -->
+    <div class="screen sub-app" id="contact-screen">
+      <div class="app-topbar">
+        <span class="app-topbar-title">연락처</span>
+        <span style="font-size:12px; color:#8b95a1;">차단된 번호 28개</span>
+      </div>
+      <div class="section-body">
+        <div style="font-size:11px; font-weight:700; color:#8b95a1; padding:0 4px;">즐겨찾기</div>
+        <div class="white-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:15px; font-weight:700;">⭐ 머저리</div>
+            <div style="font-size:12px; color:#6b7684; margin-top:2px;">010-****-0505 · 단축번호 1번</div>
+          </div>
+          <span style="font-size:18px;">📞</span>
+        </div>
+
+        <div style="font-size:11px; font-weight:700; color:#8b95a1; padding:6px 4px 0;">전체 연락처 (4)</div>
+        <div class="white-card">
+          <div style="font-size:14px; font-weight:600;">ㅇㅃ</div>
+          <div style="font-size:12px; color:#8b95a1;">010-****-3325</div>
+        </div>
+        <div class="white-card">
+          <div style="font-size:14px; font-weight:600;">엄마</div>
+          <div style="font-size:12px; color:#8b95a1;">010-****-3325</div>
+        </div>
+        <div class="white-card">
+          <div style="font-size:14px; font-weight:600;">행정지원실</div>
+          <div style="font-size:12px; color:#8b95a1;">02-****-1533</div>
+        </div>
+        <div class="white-card">
+          <div style="font-size:14px; font-weight:600;">본부 의무실</div>
+          <div style="font-size:12px; color:#8b95a1;">02-****-1545</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-6. 메시지 (문자) ==================== -->
+    <div class="screen sub-app" id="msg-screen">
+      <div class="app-topbar">
+        <span class="app-topbar-title">메시지</span>
+      </div>
+      <div class="section-body">
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:13.5px; font-weight:700;">[교보문고 알림톡]</span>
+            <span style="font-size:11px; color:#3b82f6;">오후 4:10</span>
+          </div>
+          <div style="font-size:12px; color:#4e5968; line-height:1.45;">
+            이유월님, 예약 주문하신 《제국의 마지막 기사단 한정판 양장본》 배송이 시작되었습니다.
+          </div>
+        </div>
+
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:13.5px; font-weight:700;">[현대카드 VVIP]</span>
+            <span style="font-size:11px; color:#3b82f6;">오후 2:30</span>
+          </div>
+          <div style="font-size:12px; color:#4e5968; line-height:1.45;">
+            이*월님 일시불 68,000원 승인 (메종드피치 디저트 부티크 강남점)
+          </div>
+        </div>
+
+        <div class="white-card">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:13.5px; font-weight:700;">010-98**-****</span>
+            <span style="font-size:11px; color:#8b95a1;">어제</span>
+          </div>
+          <div style="font-size:12px; color:#4e5968; line-height:1.45;">
+            저기요 카톡 안 보셔서 문자로 남겨요ㅠㅠ 저번 협회 세미나 때 번호 물어봤던... (차단됨)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 3-7. 갤러리 ==================== -->
+    <div class="screen sub-app" id="gallery-screen">
+      <div class="app-topbar">
+        <span class="app-topbar-title">갤러리</span>
+        <span style="font-size:12px; color:#8b95a1;">최근 항목 6</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-card">
+          <div class="photo-thumb" style="background:linear-gradient(135deg,#ffe4e6,#fecdd3);">😴</div>
+          <div class="photo-caption">
+            <div class="photo-date">10월 18일 · ♥ 즐겨찾기</div>
+          </div>
+        </div>
+
+        <div class="photo-card">
+          <div class="photo-thumb" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">📚</div>
+          <div class="photo-caption">
+            <div class="photo-date">10월 5일</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== 하단 갤럭시 내비게이션 바 ==================== -->
+    <div class="nav-bar">
+      <button class="nav-btn" onclick="goHome()" title="최근 앱/홈">lll</button>
+      <button class="nav-btn" onclick="goHome()" title="홈 화면">◯</button>
+      <button class="nav-btn" onclick="handleBack()" title="뒤로 가기">＜</button>
+    </div>
+  </div>
+
+  <script>
+    const statusBar = document.getElementById('status-bar');
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+
+      // 밝은 배경의 서브 앱일 때는 상단 상태바 글씨를 어둡게 변경
+      const lightApps = ['kakao-screen', 'memo-screen', 'ebook-screen', 'contact-screen', 'msg-screen', 'gallery-screen'];
+      if (lightApps.includes(screenId)) {
+        statusBar.classList.add('dark-text');
+      } else {
+        statusBar.classList.remove('dark-text');
+      }
+    }
+
+    function unlockPhone() {
+      showScreen('home-screen');
+    }
+
+    function lockPhone() {
+      closeKakaoChat();
+      showScreen('lock-screen');
+    }
+
+    function goHome() {
+      if (document.getElementById('lock-screen').classList.contains('active')) return;
+      closeKakaoChat();
+      showScreen('home-screen');
+    }
+
+    function openApp(screenId) {
+      closeKakaoChat();
+      showScreen(screenId);
+    }
+
+    function handleBack() {
+      if (document.getElementById('lock-screen').classList.contains('active')) return;
+      const chatView = document.getElementById('kakao-chat-view');
+      if (chatView.style.display === 'flex') {
+        closeKakaoChat();
+        return;
+      }
+      goHome();
+    }
+
+    /* ==================== 카카오톡 대화 데이터 ==================== */
+    const kakaoChats = {
+      isol: {
+        title: '머저리',
+        messages: [
+          { type: 'date', text: '2026년 10월 19일 월요일' },
+          { sender: 'me', text: '언제 끝나', time: '오후 5:50' },
+          { sender: 'me', text: '추워', time: '오후 5:51' },
+          { sender: 'me', text: '누나', time: '오후 5:51' },
+          { sender: 'me', text: '누나', time: '오후 5:51' },
+          { sender: 'me', text: '누나', time: '오후 5:51' },
+          { sender: 'them', name: '머저리', text: '지금 게이트 정산 서류만 내면 끝이에요!', time: '오후 6:12' },
+          { sender: 'them', name: '머저리', text: '머리 안 아프세요?', time: '오후 6:12' },
+          { sender: 'me', text: '안 아파', time: '오후 6:13' },
+          { sender: 'me', text: '빨리 내려와', time: '오후 6:13' },
+          { sender: 'me', text: '빨리오라고', time: '오후 6:14' },
+          { sender: 'them', name: '머저리', text: '1층 로비 내려가는 중이에요!', time: '오후 6:42' }
+        ]
+      },
+      flirt1: {
+        title: '강하진 (A급/공격1팀)',
+        messages: [
+          { type: 'date', text: '2026년 10월 19일 월요일' },
+          { sender: 'them', name: '강하진', text: '부길드장님 오늘 로비 지나가시는 거 봤는데 수트 엄청 잘 어울리시던데요ㅎㅎ', time: '오후 1:20' },
+          { sender: 'them', name: '강하진', text: '혹시 오늘 퇴근하고 저녁에 시간 되세요?', time: '오후 1:21' },
+          { sender: 'them', name: '강하진', text: '청담 쪽에 새로 생긴 라운지 바 있는데 같이 가요!', time: '오후 3:45' },
+          { sender: 'them', name: '강하진', text: '바쁘신가 보네ㅠ 다음에 시간 나실 때 꼭 같이 마셔요!', time: '오후 5:10' }
+        ]
+      },
+      flirt2: {
+        title: '김서연 (백호길드)',
+        messages: [
+          { type: 'date', text: '2026년 10월 18일 일요일' },
+          { sender: 'them', name: '김서연', text: '안녕하세요 유월 씨! 저번 합동 레이드 때 인사드렸던 백호길드 김서연이에요~', time: '오후 7:05' },
+          { sender: 'them', name: '김서연', text: '번호 겨우 물어봤네요ㅋㅋ', time: '오후 7:05' },
+          { sender: 'them', name: '김서연', text: '혹시 이번 주말에 시간 괜찮으세요? 밥 한번 사고 싶어서요ㅎㅎ', time: '오후 8:30' }
+        ]
+      },
+      guildmate: {
+        title: '최태성 (북극성 B급)',
+        messages: [
+          { sender: 'them', name: '최태성', text: '부길드장님 이번 주 금요일 공격대 전체 회식 자리 잠깐이라도 들르십니까!', time: '어제' },
+          { sender: 'them', name: '최태성', text: '다들 부길드장님 실물 한번 뵙고 싶어합니다ㅋㅋ', time: '어제' }
+        ]
+      },
+      mom: {
+        title: '어머니',
+        messages: [
+          { sender: 'them', name: '어머니', text: '이번 주말엔 본가 안 오니?', time: '10월 16일' },
+          { sender: 'me', text: '약속 있어요', time: '10월 16일' },
+          { sender: 'them', name: '어머니', text: '밥은 잘 챙겨 먹고 다니지?', time: '10월 16일' }
+        ]
+      }
+    };
+
+    function openKakaoChat(key) {
+      document.getElementById('kakao-list-topbar').style.display = 'none';
+      document.getElementById('kakao-room-list').style.display = 'none';
+      const chatView = document.getElementById('kakao-chat-view');
+      const bubbles = document.getElementById('kakao-chat-bubbles');
+      const titleEl = document.getElementById('kakao-chat-title');
+
+      chatView.style.display = 'flex';
+      titleEl.textContent = kakaoChats[key].title;
+      bubbles.innerHTML = '';
+
+      kakaoChats[key].messages.forEach(m => {
+        if (m.type === 'date') {
+          const d = document.createElement('div');
+          d.className = 'k-date-pill';
+          d.textContent = m.text;
+          bubbles.appendChild(d);
+          return;
+        }
+
+        const row = document.createElement('div');
+        row.className = `k-row ${m.sender}`;
+
+        if (m.sender === 'them') {
+          const name = document.createElement('div');
+          name.className = 'k-sender';
+          name.textContent = m.name;
+          row.appendChild(name);
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'k-bubble-wrap';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'k-bubble';
+        bubble.textContent = m.text;
+
+        const time = document.createElement('span');
+        time.className = 'k-time';
+        time.textContent = m.time;
+
+        if (m.sender === 'me') {
+          wrap.appendChild(time);
+          wrap.appendChild(bubble);
+        } else {
+          wrap.appendChild(bubble);
+          wrap.appendChild(time);
+        }
+
+        row.appendChild(wrap);
+        bubbles.appendChild(row);
+      });
+    }
+
+    function closeKakaoChat() {
+      document.getElementById('kakao-list-topbar').style.display = 'flex';
+      document.getElementById('kakao-room-list').style.display = 'block';
+      document.getElementById('kakao-chat-view').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
