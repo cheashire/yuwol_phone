@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>들키면 죽음</title>
+  <title>이유월 핸드폰</title>
   <style>
     :root {
       --text-light: #ffffff;
@@ -673,6 +673,13 @@
       position: relative;
     }
 
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .photo-caption {
       padding: 10px;
       font-size: 12px;
@@ -954,12 +961,12 @@
           </div>
         </div>
 
-        <!-- 5. 어머니 -->
+        <!-- 5. 엄마 -->
         <div class="kakao-room-item" onclick="openKakaoChat('mom')">
           <div class="kakao-avatar">🌿</div>
           <div class="kakao-info">
-            <div class="kakao-name">어머니</div>
-            <div class="kakao-preview">그래 밥은 잘 챙겨 먹고 다니니</div>
+            <div class="kakao-name">엄마</div>
+            <div class="kakao-preview">밥은 잘 챙겨 먹고 다니지?</div>
           </div>
           <div class="kakao-meta">
             <span class="kakao-time">10월 16일</span>
@@ -1119,24 +1126,37 @@
     <div class="screen sub-app" id="gallery-screen">
       <div class="app-topbar">
         <span class="app-topbar-title">갤러리</span>
-        <span style="font-size:12px; color:#8b95a1;">최근 항목 6</span>
+        <span style="font-size:12px; color:#8b95a1;">최근 항목 2</span>
       </div>
+
       <div class="gallery-grid">
-        <div class="photo-card">
-          <div class="photo-thumb" style="background:linear-gradient(135deg,#ffe4e6,#fecdd3);">😴</div>
+        <!-- 첫 번째 사진 (외부 이미지 링크 예시) -->
+        <div class="photo-card" onclick="openPhotoModal(this)">
+          <div class="photo-thumb">
+            <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500" alt="복숭아 케이크" />
+          </div>
           <div class="photo-caption">
             <div class="photo-date">10월 18일 · ♥ 즐겨찾기</div>
           </div>
         </div>
 
-        <div class="photo-card">
-          <div class="photo-thumb" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">📚</div>
+        <!-- 두 번째 사진 (외부 이미지 링크 또는 깃허브 파일 예시) -->
+        <div class="photo-card" onclick="openPhotoModal(this)">
+          <div class="photo-thumb">
+            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500" alt="판타지 소설책" />
+          </div>
           <div class="photo-caption">
             <div class="photo-date">10월 5일</div>
           </div>
         </div>
-
       </div>
+
+                <!-- 사진 확대 모달창 -->
+        <div id="photo-modal" onclick="closePhotoModal()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:200; flex-direction:column; align-items:center; justify-content:center; padding:20px; cursor:pointer;">
+          <img id="modal-img" src="" style="max-width:100%; max-height:80%; border-radius:12px; object-fit:contain;" />
+          <div id="modal-date" style="color:#fff; font-size:13px; margin-top:14px;"></div>
+          <div style="color:rgba(255,255,255,0.5); font-size:11px; margin-top:6px;">화면을 터치하면 닫힙니다</div>
+        </div>
     </div>
 
     <!-- ==================== 하단 갤럭시 내비게이션 바 ==================== -->
@@ -1193,6 +1213,18 @@
       goHome();
     }
 
+    function openPhotoModal(cardEl) {
+      const imgSrc = cardEl.querySelector('img').src;
+      const dateText = cardEl.querySelector('.photo-date').textContent;
+      document.getElementById('modal-img').src = imgSrc;
+      document.getElementById('modal-date').textContent = dateText;
+      document.getElementById('photo-modal').style.display = 'flex';
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photo-modal').style.display = 'none';
+    }
+
     /* ==================== 카카오톡 대화 데이터 ==================== */
     const kakaoChats = {
       isol: {
@@ -1200,7 +1232,7 @@
         messages: [
           { type: 'date', text: '2026년 10월 19일 월요일' },
           { sender: 'me', text: '언제 끝나', time: '오후 5:50' },
-          { sender: 'me', text: '추워', time: '오후 5:51' },
+          { sender: 'me', text: '더워', time: '오후 5:51' },
           { sender: 'me', text: '누나', time: '오후 5:51' },
           { sender: 'me', text: '누나', time: '오후 5:51' },
           { sender: 'me', text: '누나', time: '오후 5:51' },
@@ -1239,11 +1271,11 @@
         ]
       },
       mom: {
-        title: '어머니',
+        title: '엄마',
         messages: [
-          { sender: 'them', name: '어머니', text: '이번 주말엔 본가 안 오니?', time: '10월 16일' },
+          { sender: 'them', name: '엄마', text: '이번 주말엔 본가 안 오니?', time: '10월 16일' },
           { sender: 'me', text: '약속 있어요', time: '10월 16일' },
-          { sender: 'them', name: '어머니', text: '밥은 잘 챙겨 먹고 다니지?', time: '10월 16일' }
+          { sender: 'them', name: '엄마', text: '밥은 잘 챙겨 먹고 다니지?', time: '10월 16일' }
         ]
       }
     };
