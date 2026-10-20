@@ -705,6 +705,27 @@
       flex-shrink: 0;
     }
 
+    .k-meta-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .k-row.them .k-meta-col {
+      align-items: flex-start;
+    }
+
+    .k-unread-count {
+      font-size: 10px;
+      font-weight: 800;
+      color: #ffeb3b;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+      line-height: 1;
+    }
+
     /* ==================== 3-2. 갤러리 ==================== */
     .gallery-grid {
       display: grid;
@@ -1072,13 +1093,39 @@
           </div>
         </div>
 
+<!-- 사내 익명 라운지 인기글 모음 -->
         <div class="polaris-card">
-          <span class="p-badge" style="background:rgba(244,63,94,0.15); color:#fb7185;">사내 익명 라운지 인기글</span>
-          <div style="font-size:13px; font-weight:600; margin-bottom:4px;">방금 지하 주차장에서 부길드장님 본 썰</div>
-          <div style="font-size:12px; color:#94a3b8;">
-            인상은 여전히 무서운데 손에 복숭아 맛 디저트 봉투 달랑달랑 들고 있어서 눈 의심함ㅋㅋㅋ
+          <span class="p-badge" style="background:rgba(244,63,94,0.15); color:#fb7185;">익명 라운지 HOT · 추천 84</span>
+          <div style="font-size:13.5px; font-weight:700; margin-bottom:5px;">본부 원래 특급 호텔이었다는 거 체감되는 순간</div>
+          <div style="font-size:12px; color:#94a3b8; line-height:1.5;">
+            지하 3층 훈련장 샤워실 수압이랑 수건 퀄리티는 미쳤는데, 1층 주차비는 왜 소속 헌터한테도 할인이 안 되냐? D급 게이트 정산금보다 주차비가 더 나오겠네ㅋㅋ
           </div>
         </div>
+
+        <div class="polaris-card">
+          <span class="p-badge" style="background:rgba(244,63,94,0.15); color:#fb7185;">익명 라운지 HOT · 추천 142</span>
+          <div style="font-size:13.5px; font-weight:700; margin-bottom:5px;">임시 파티 들어갈 때 계약서 특약 꼭 확인해라</div>
+          <div style="font-size:12px; color:#94a3b8; line-height:1.5;">
+            특히 하위 등급 힐러나 보조계들. 로비 전광판 급구 파티 아무 생각 없이 수락했다가 딜러가 아티팩트 폭주시키면 배상금 연대책임으로 다 뒤집어쓴다. 행정실도 상위 헌터 편만 들어주니까 특약 캡처 필수임.
+          </div>
+        </div>
+
+        <div class="polaris-card">
+          <span class="p-badge" style="background:rgba(244,63,94,0.15); color:#fb7185;">익명 라운지 HOT · 추천 63</span>
+          <div style="font-size:13.5px; font-weight:700; margin-bottom:5px;">1층 로비 카페 알바생 최소 정신계 각성자 아님?</div>
+          <div style="font-size:12px; color:#94a3b8; line-height:1.5;">
+            방금 레이드 끝난 공격대 아저씨들 피 묻은 장비 입고 우르르 몰려가서 주문하는데 눈 하나 깜짝 안 하고 "아샷추 맞으시죠? 진동벨 챙기세요~" 이러고 있음ㅋㅋ 기가 절대 안 눌림
+          </div>
+        </div>
+
+        <div class="polaris-card">
+          <span class="p-badge" style="background:rgba(56,189,248,0.15); color:#38bdf8;">실시간 장터 · 방금 전</span>
+          <div style="font-size:13.5px; font-weight:700; margin-bottom:5px;">[직거래] 정산소 줄 너무 길어서 부산물 급처합니다</div>
+          <div style="font-size:12px; color:#94a3b8; line-height:1.5;">
+            1층 정산소 대기 줄 전광판 끝까지 서 있어서 기다리다 숨 넘어갈 듯. C급 몬스터 부산물 길드 매입가보다 10% 싸게 넘기니까 지금 로비 소파로 오실 분 구함.
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1095,7 +1142,6 @@
             <span style="font-size:11px; color:#059669; font-weight:700;">88%</span>
           </div>
           <div style="font-size:12px; color:#6b7684;">정통 판타지 · 18권 읽는 중</div>
-          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "세계관은 큰데 마법 영창이 너무 김."</div>
         </div>
 
         <div class="white-card">
@@ -1104,7 +1150,6 @@
             <span style="font-size:11px; color:#059669; font-weight:700;">완독</span>
           </div>
           <div style="font-size:12px; color:#6b7684;">대서사 판타지 · 전 24권</div>
-          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "주먹으로 다 부수는 전개라 마음에 듦."</div>
         </div>
 
         <div class="white-card">
@@ -1113,7 +1158,6 @@
             <span style="font-size:11px; color:#f59e0b; font-weight:700;">하차</span>
           </div>
           <div style="font-size:12px; color:#6b7684;">판타지 · 3권에서 멈춤</div>
-          <div style="font-size:11.5px; color:#8b95a1; margin-top:6px;">내 한줄평: "주인공이 답답하게 말만 많음."</div>
         </div>
       </div>
     </div>
@@ -1374,7 +1418,7 @@
       renderKakaoMessages(key);
     }
 
-    function renderKakaoMessages(key) {
+function renderKakaoMessages(key) {
       const bubbles = document.getElementById('kakao-chat-bubbles');
       bubbles.innerHTML = '';
 
@@ -1404,16 +1448,28 @@
         bubble.className = 'k-bubble';
         bubble.textContent = m.text;
 
+        // 안 읽음 표시(1)와 시간을 묶어주는 영역
+        const metaCol = document.createElement('div');
+        metaCol.className = 'k-meta-col';
+
+        if (m.unread) {
+          const unreadEl = document.createElement('span');
+          unreadEl.className = 'k-unread-count';
+          unreadEl.textContent = m.unread;
+          metaCol.appendChild(unreadEl);
+        }
+
         const time = document.createElement('span');
         time.className = 'k-time';
         time.textContent = m.time;
+        metaCol.appendChild(time);
 
         if (m.sender === 'me') {
-          wrap.appendChild(time);
+          wrap.appendChild(metaCol);
           wrap.appendChild(bubble);
         } else {
           wrap.appendChild(bubble);
-          wrap.appendChild(time);
+          wrap.appendChild(metaCol);
         }
 
         row.appendChild(wrap);
@@ -1438,11 +1494,12 @@
       h = h % 12 || 12;
       const timeStr = `${ampm} ${h}:${m}`;
 
-      // 메시지 배열에 추가
+      // 메시지 배열에 추가 (unread: 1 포함)
       kakaoChats[currentChatKey].messages.push({
         sender: 'me',
         text: text,
-        time: timeStr
+        time: timeStr,
+        unread: 1
       });
 
       // 채팅방 목록의 미리보기 문구와 시간도 최신으로 업데이트
